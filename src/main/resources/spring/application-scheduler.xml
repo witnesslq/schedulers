@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:property-placeholder location="jdbc.properties, app.properties"/>
+
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <!-- 指定连接数据库的驱动-->
+        <property name="driverClass" value="${jdbc.driverClassName}"/>
+        <!-- 指定连接数据库的URL-->
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <!-- 指定连接数据库的用户名-->
+        <property name="user" value="${jdbc.username}"/>
+        <!-- 指定连接数据库的密码-->
+        <property name="password" value="${jdbc.password}"/>
+        <!-- 指定连接池中保留的最大连接数. Default:15-->
+        <property name="maxPoolSize" value="${jdbc.maxPoolSize}"/>
+        <!-- 指定连接池中保留的最小连接数-->
+        <property name="minPoolSize" value="${jdbc.minPoolSize}"/>
+        <!-- 指定连接池的初始化连接数  取值应在minPoolSize 与 maxPoolSize 之间.Default:3-->
+        <property name="initialPoolSize" value="${jdbc.initialPoolSize}"/>
+        <!-- 最大空闲时间,60秒内未使用则连接被丢弃。若为0则永不丢弃。 Default:0-->
+        <property name="maxIdleTime" value="${jdbc.maxIdleTime}"/>
+        <!-- 当连接池中的连接耗尽的时候c3p0一次同时获取的连接数. Default:3-->
+        <property name="acquireIncrement" value="${jdbc.acquireIncrement}"/>
+        <!-- JDBC的标准,用以控制数据源内加载的PreparedStatements数量。
+        但由于预缓存的statements属于单个connection而不是整个连接池所以设置这个参数需要考虑到多方面的因数.如果maxStatements与maxStatementsPerConnection均为0,则缓存被关闭。Default:0-->
+        <property name="maxStatements" value="${jdbc.maxStatements}"/>
+        <!-- 每60秒检查所有连接池中的空闲连接.Default:0 -->
+        <property name="idleConnectionTestPeriod" value="${jdbc.idleConnectionTestPeriod}"/>
+    </bean>
+
+    <!-- 启动触发器的配置开始 -->
+    <bean name="scheduler" lazy-init="false" autowire="no"
+          class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="applicationContextSchedulerContextKey" value="applicationContextKey"/>
+        <property name="quartzProperties" value="classpath:quartz.properties"/>
+        <property name="schedulerName" value="bigEngineScheduler"/>
+        <!-- scheduler延时启动 -->
+        <property name="startupDelay" value="${scheduler.startupDelay}"/>
+        <!--可选，scheduler 启动时更新己存在的Job，这样就不用每次修改targetObject后删除qrtz_job_details表对应记录了 -->
+        <property name="overwriteExistingJobs" value="true"/>
+        <!-- 设置自动启动 -->
+        <property name="autoStartup" value="true" />
+        <property name="triggers">
+            <list>
+                <ref bean="helloTrigger"/>
+                <ref bean="wordTrigger"/>
+            </list>
+        </property>
+    </bean>
+    <!-- 启动触发器的配置结束 -->
+
+    <bean id="helloJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass">
+            <value>com.schedulers.job.MyJobHello</value>
+        </property>
+        <property name="durability" value="true"/>
+        <!-- 属性必须设置为 true,当Quartz服务被中止后，再次启动或集群中其他机器接手任务时会尝试恢复执行之前未完成的所有任务. -->
+        <property name="requestsRecovery" value="true"/>
+    </bean>
+    <bean id="helloTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="helloJob"/>
+        <property name="cronExpression" value="${helloTrigger.cron}"/>
+    </bean>
+
+    <bean id="wordJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass">
+            <value>com.schedulers.job.MyJobWord</value>
+        </property>
+        <property name="durability" value="true"/>
+        <!-- 属性必须设置为 true,当Quartz服务被中止后，再次启动或集群中其他机器接手任务时会尝试恢复执行之前未完成的所有任务. -->
+        <property name="requestsRecovery" value="true"/>
+    </bean>
+    <bean id="wordTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="wordJob"/>
+        <property name="cronExpression" value="${wordTrigger.cron}"/>
+    </bean>
+
+</beans>

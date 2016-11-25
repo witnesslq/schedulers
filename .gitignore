@@ -1,0 +1,11 @@
+/.idea/
+/target/
+*/target/
+*.iml
+/out/
+/.settings/
+*.classpath
+*.project
+src/main/webapp/WEB-INF/classes/
+src/main/webapp/WEB-INF/lib/
+src/main/webapp/META-INF/
