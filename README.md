@@ -1,7 +1,7 @@
 最近准备做一个可满足易扩展,高可用,负载均衡的分布式任务调度器参考了网上的很多帖子和文章.遗憾的是没有找到一个可以跑起来实例,下面是我调整总结可以跑起来的实例.在这里记录下.
 系统特点也是Quertz的特点,支持水平扩展,通俗的说就是可以部署多个服务节点/不存在任务重复执行的情况/一个任务节点宕机后其他节点的任务可以照常继续执行.不说废话了,直接上代码.
-[Quartz集群架构可以参考这个帖子](http://www.cnblogs.com/davidwang456/p/4205237.html)
-[Quartz官网地址](http://www.quartz-scheduler.org/downloads/)
+### [Quartz官网地址](http://www.quartz-scheduler.org/downloads/)
+### [Quartz集群架构可以参考这个帖子](http://www.cnblogs.com/davidwang456/p/4205237.html)
 
 ### Quartz分布式集群方案
 
